@@ -128,14 +128,38 @@ function reSort(langs) {
     langs.sort();
     return langs;
 }
+function getClients(tourGuide, tourists) {
+    // function returns clients for guides if guide knows any of client goal and language
+    return tourists.reduce((arr, tourist) => {
+        const foundLangs = tourist.languages.some(lang => tourGuide.languages.includes(lang));
+        const foundPlaces = tourist.goals.some(goal => tourGuide.places.includes(goal));
+        if (foundLangs && foundPlaces)
+            arr.push(tourist);
+        return arr;
+    }, []);
+}
 // {{Calls}}
 const guideLng = getAllLanguages(tourGuides);
 const touristsLng = getAllLanguages(tourists);
+let clientLists = [];
+tourGuides.forEach(guide => {
+    const listForGuide = {
+        guide: guide,
+        clients: getClients(guide, tourists),
+    };
+    clientLists.push(listForGuide);
+});
 // {{Return result to html}}
 let htmlResult = "<h1>Gidai</h1>";
 guideLng.forEach((lng) => htmlResult += `<div>${lng}</div>`);
 htmlResult += "<h1>Turistai</h1>";
 touristsLng.forEach((lng) => htmlResult += `<div>${lng}</div>`);
+htmlResult += `<hr></hr>`;
+clientLists.forEach((listIndex) => {
+    htmlResult += `<h3>${listIndex.guide.firstName} iš kompanijos "
+    ${listIndex.guide.company}", gali eiti su:</h3>`;
+    listIndex.clients.forEach((client) => htmlResult += `<div>${client.firstName}</div>`);
+});
 const el = document.getElementById("guides");
 if (el)
     el.innerHTML = htmlResult;
