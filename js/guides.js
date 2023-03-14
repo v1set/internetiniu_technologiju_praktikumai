@@ -114,13 +114,18 @@ const visitedPlaces = [
 ];
 // {{Functions}}
 function getAllLanguages(people) {
-    const langs = [];
+    let langs = [];
     people.forEach((person) => {
         person.languages.forEach((lang) => {
             if (!langs.includes(lang))
                 langs.push(lang);
         });
     });
+    langs = reSort(langs);
+    return langs;
+}
+function reSort(langs) {
+    langs.sort();
     return langs;
 }
 // {{Calls}}

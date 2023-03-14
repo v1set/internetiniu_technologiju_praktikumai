@@ -145,15 +145,20 @@ const visitedPlaces: Array<VisitedPlace> = [
 // {{Functions}}
 
 function getAllLanguages<T extends GenParams>(people: Array<T>): Array<string> {
-    const langs: Array<string> = [];
+    let langs: Array<string> = [];
     people.forEach((person) => {
         person.languages.forEach((lang) => {
             if (!langs.includes(lang)) langs.push(lang);
         });
     });
+    langs = reSort(langs)
     return langs;
 }
 
+function reSort(langs: Array<string>): Array<string> {
+    langs.sort();
+    return langs;
+}
 
 // {{Calls}}
 
