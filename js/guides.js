@@ -8,6 +8,7 @@ const tourists = [
         languages: ["en", "no"],
         goals: [1, 7],
         family: [5],
+        genger: 'm',
     },
     {
         id: 2,
@@ -15,6 +16,7 @@ const tourists = [
         languages: ["rus"],
         goals: [1, 2, 3, 4],
         family: [],
+        genger: 'f',
     },
     {
         id: 3,
@@ -22,6 +24,7 @@ const tourists = [
         languages: ["esp"],
         goals: [1, 2, 3, 5, 8],
         family: [],
+        genger: 'm',
     },
     {
         id: 4,
@@ -29,6 +32,7 @@ const tourists = [
         languages: ["eng", "lv"],
         goals: [4, 8],
         family: [],
+        genger: 'm',
     },
     {
         id: 5,
@@ -36,6 +40,7 @@ const tourists = [
         languages: ["lt", "rus", "eng", "fr"],
         goals: [2, 3, 4, 5, 6, 7],
         family: [1],
+        genger: 'f',
     },
     {
         id: 6,
@@ -43,6 +48,7 @@ const tourists = [
         languages: ["fr"],
         goals: [2, 3, 4, 5, 6],
         family: [7],
+        genger: 'f',
     },
     {
         id: 7,
@@ -50,6 +56,7 @@ const tourists = [
         languages: ["fr"],
         goals: [2, 3, 4, 5, 6],
         family: [6],
+        genger: 'm',
     },
 ];
 const tourGuides = [
@@ -58,24 +65,28 @@ const tourGuides = [
         company: "Novaturas",
         languages: ["en", "fr", "esp"],
         places: [1, 3, 5, 8],
+        genger: 'f',
     },
     {
         firstName: "Skirmantas",
         company: "Tez Tour",
         languages: ["lt", "rus"],
         places: [2, 6],
+        genger: 'm',
     },
     {
         firstName: "Agnė",
         company: "AirGuru",
         languages: ["lt", "en", "lv"],
         places: [2, 6],
+        genger: 'f',
     },
     {
         firstName: "Ernestas",
         company: "AirGuru",
         languages: ["lt", "lv"],
         places: [1, 2, 6],
+        genger: 'm',
     },
 ];
 const visitedPlaces = [
