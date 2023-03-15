@@ -138,6 +138,44 @@ function getClients(tourGuide, tourists) {
         return arr;
     }, []);
 }
+function getGuidesForPlace(guides, place) {
+    return guides.reduce((arr, guide) => {
+        if (guide.places.find(pl => pl === place))
+            arr.push(guide);
+        return arr;
+    }, []);
+}
+function knowsLanguage(guides, langs) {
+    return guides.reduce((arr, guide) => {
+        if (langs.some(lang => guide.languages.includes(lang)))
+            arr.push(guide);
+        return arr;
+    }, []);
+}
+function sadnessWithGuide(guides, tourist) {
+    const arr = [];
+    tourist.goals.forEach(goal => {
+        const guidesWhoKnowsPlace = getGuidesForPlace(guides, goal);
+        const knowsLang = knowsLanguage(guidesWhoKnowsPlace, tourist.languages);
+        // yra gidas zinantis kalba
+        if (!!knowsLang[0])
+            return;
+        // nera zinanciu kalbos bet yra zinanaciu vieta
+        else if (!!!knowsLang[0] && !!guidesWhoKnowsPlace[0]) {
+            const problem = { place: goal, tourist: tourist,
+                reason: "Gidas galintis aprodyti šią vietą nemoka turisto klabos" };
+            arr.push(problem);
+        }
+        // nera zinanciu vietos
+        else if (!!!guidesWhoKnowsPlace[0]) {
+            const problem = { place: goal, tourist: tourist,
+                reason: "Nėra gido galinčio aprodyti šia vietą" };
+            arr.push(problem);
+        }
+    });
+    // console.log(arr)
+    return arr;
+}
 // {{Calls}}
 const guideLng = getAllLanguages(tourGuides);
 const touristsLng = getAllLanguages(tourists);
@@ -148,6 +186,10 @@ tourGuides.forEach(guide => {
         clients: getClients(guide, tourists),
     };
     clientLists.push(listForGuide);
+});
+let problemWithGuide = [];
+tourists.forEach(tourist => {
+    problemWithGuide.push(sadnessWithGuide(tourGuides, tourist));
 });
 // {{Return result to html}}
 let htmlResult = "<h1>Gidai</h1>";
@@ -160,6 +202,17 @@ clientLists.forEach((listIndex) => {
     ${listIndex.guide.company}", gali eiti su:</h3>`;
     listIndex.clients.forEach((client) => htmlResult += `<div>${client.firstName}</div>`);
 });
+htmlResult += `<hr></hr> <table border='1'> <tr> <th>Turistas</th> <th>Neaplankys vietos</th> <th>Nes</th>`;
+problemWithGuide.forEach(touristProblems => {
+    touristProblems.forEach(problem => {
+        htmlResult += `<tr> <td>  ${problem.tourist.firstName} </td><td> 
+        ${visitedPlaces[visitedPlaces.findIndex(x => x.id === problem.place)].title} </td><td> 
+        ${problem.reason}</td></tr> `;
+    });
+});
+htmlResult += `</table>`;
 const el = document.getElementById("guides");
 if (el)
     el.innerHTML = htmlResult;
+const myVal = false;
+console.log(!!myVal);

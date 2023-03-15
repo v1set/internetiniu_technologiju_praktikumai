@@ -29,6 +29,18 @@ interface ClientsForGuide {
     clients: Array<Tourist>;
 }
 
+interface PlaceForReason {
+    placeId: number
+    
+}
+
+interface ProblemWithGuide {
+    tourist: Tourist,
+    place: number
+    reason: "Nėra gido galinčio aprodyti šia vietą" | 
+    "Gidas galintis aprodyti šią vietą nemoka turisto klabos"    
+}
+
 
 // {{Arrays}}
 
@@ -175,6 +187,46 @@ function getClients(tourGuide: Guide, tourists:Array<Tourist>): Array<Tourist> {
     }, <Array<Tourist>>[] );
 }
 
+function getGuidesForPlace(guides:Array<Guide>, place:Number): Array<Guide> {
+    return guides.reduce((arr, guide) => {
+        if (guide.places.find(pl => pl === place)) arr.push(guide)
+        return arr
+    }, <Array<Guide>>[] );
+}
+
+function knowsLanguage(guides:Array<Guide>, langs:Array<string>): Array<Guide> {
+    return guides.reduce((arr, guide) => {
+        if (langs.some(lang => guide.languages.includes(lang))) arr.push(guide)
+        return arr
+    }, <Array<Guide>>[] );
+}
+
+function sadnessWithGuide(guides:Array<Guide>, tourist:Tourist): Array<ProblemWithGuide> {
+    const arr: Array<ProblemWithGuide> = []
+
+    tourist.goals.forEach(goal => {
+        const guidesWhoKnowsPlace = getGuidesForPlace(guides, goal)
+        const knowsLang = knowsLanguage(guidesWhoKnowsPlace, tourist.languages)
+
+        // yra gidas zinantis kalba
+        if (!!knowsLang[0]) return
+        // nera zinanciu kalbos bet yra zinanaciu vieta
+        else if (!!!knowsLang[0] && !!guidesWhoKnowsPlace[0]) {
+            const problem:ProblemWithGuide = {place: goal, tourist: tourist,
+                reason: "Gidas galintis aprodyti šią vietą nemoka turisto klabos"}
+            arr.push(problem)
+        }
+        // nera zinanciu vietos
+        else if (!!!guidesWhoKnowsPlace[0]) {
+            const problem:ProblemWithGuide = {place: goal, tourist: tourist,
+                reason: "Nėra gido galinčio aprodyti šia vietą"}
+            arr.push(problem)
+        }
+    })
+    // console.log(arr)
+    return arr;
+}
+
 
 // {{Calls}}
 
@@ -188,6 +240,12 @@ tourGuides.forEach(guide => {
         clients: getClients(guide, tourists),
     } 
     clientLists.push(listForGuide)
+})
+
+let problemWithGuide: Array<Array<ProblemWithGuide>> = []
+
+tourists.forEach(tourist => {
+    problemWithGuide.push( sadnessWithGuide(tourGuides, tourist) )
 })
 
 
@@ -206,5 +264,19 @@ clientLists.forEach((listIndex) => {
     listIndex.clients.forEach((client) => htmlResult += `<div>${client.firstName}</div>`)
 })
 
+htmlResult += `<hr></hr> <table border='1'> <tr> <th>Turistas</th> <th>Neaplankys vietos</th> <th>Nes</th>`
+problemWithGuide.forEach(touristProblems => {
+    touristProblems.forEach(problem => {
+        htmlResult += `<tr> <td>  ${problem.tourist.firstName} </td><td> 
+        ${visitedPlaces[visitedPlaces.findIndex(x => x.id === problem.place)].title} </td><td> 
+        ${problem.reason}</td></tr> `
+    })
+})
+htmlResult += `</table>`
+
 const el = document.getElementById("guides")
     if (el) el.innerHTML = htmlResult;
+
+    const myVal = false
+    console.log(!!myVal)
+    
