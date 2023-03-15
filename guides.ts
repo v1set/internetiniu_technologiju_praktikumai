@@ -41,6 +41,11 @@ interface ProblemWithGuide {
     "Gidas galintis aprodyti šią vietą nemoka turisto klabos"    
 }
 
+interface GuidesFromCompany {
+    company: string
+    guides: Array<Guide>
+}
+
 
 // {{Arrays}}
 
@@ -227,12 +232,33 @@ function sadnessWithGuide(guides:Array<Guide>, tourist:Tourist): Array<ProblemWi
     return arr;
 }
 
+function guidesFromCompany(guides:Array<Guide>):Array<GuidesFromCompany> {
+    const companiesUnique: Array<string> = [];
+    const companies: Array<GuidesFromCompany> = [];
+
+    guides.forEach(guide => {
+        if (!companiesUnique.includes(guide.company)) {
+            companiesUnique.push(guide.company)
+            
+            const newGuides:Array<Guide> = []
+
+            guides.forEach(guideFromCompany => {
+                if (guideFromCompany.company === guide.company) 
+                    newGuides.push(guideFromCompany) 
+            })
+            companies.push({company: guide.company, guides: newGuides})
+        }
+    });
+    return companies
+}
+
+
 
 // {{Calls}}
 
 const guideLng = getAllLanguages(tourGuides);
 const touristsLng = getAllLanguages(tourists);
-let clientLists: Array<ClientsForGuide> = []
+const clientLists: Array<ClientsForGuide> = []
 
 tourGuides.forEach(guide => {
     const listForGuide: ClientsForGuide = {
@@ -247,6 +273,8 @@ let problemWithGuide: Array<Array<ProblemWithGuide>> = []
 tourists.forEach(tourist => {
     problemWithGuide.push( sadnessWithGuide(tourGuides, tourist) )
 })
+
+const guidesFromCompanies = guidesFromCompany(tourGuides)
 
 
 // {{Return result to html}}
@@ -274,9 +302,13 @@ problemWithGuide.forEach(touristProblems => {
 })
 htmlResult += `</table>`
 
+htmlResult += `<hr></hr> <table border='1'> <tr> <th>Kompanija</th> <th>Gidai</th>`
+console.log(guidesFromCompanies)
+guidesFromCompanies.forEach(company => {
+    htmlResult += `<tr> <td> ${company.company} </td>
+    <td> ${company.guides?.map(g => g.firstName)} </td> </tr>`
+})
+htmlResult += `</table>`
+
 const el = document.getElementById("guides")
     if (el) el.innerHTML = htmlResult;
-
-    const myVal = false
-    console.log(!!myVal)
-    
