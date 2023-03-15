@@ -184,7 +184,6 @@ function sadnessWithGuide(guides, tourist) {
             arr.push(problem);
         }
     });
-    // console.log(arr)
     return arr;
 }
 function guidesFromCompany(guides) {
@@ -203,6 +202,18 @@ function guidesFromCompany(guides) {
     });
     return companies;
 }
+function getByGender(guides, tourists) {
+    const people = [];
+    guides.forEach(guide => {
+        people.push({ firstName: guide.firstName, genger: guide.genger, status: "Gidas" });
+    });
+    tourists.forEach(tourist => {
+        people.push({ firstName: tourist.firstName, genger: tourist.genger, status: "Turistas" });
+    });
+    people.sort((a, b) => { if (a.genger < b.genger)
+        return -1; return 1; });
+    return people;
+}
 // {{Calls}}
 const guideLng = getAllLanguages(tourGuides);
 const touristsLng = getAllLanguages(tourists);
@@ -219,6 +230,7 @@ tourists.forEach(tourist => {
     problemWithGuide.push(sadnessWithGuide(tourGuides, tourist));
 });
 const guidesFromCompanies = guidesFromCompany(tourGuides);
+const peopleByGenger = getByGender(tourGuides, tourists);
 // {{Return result to html}}
 let htmlResult = "<h1>Gidai</h1>";
 guideLng.forEach((lng) => htmlResult += `<div>${lng}</div>`);
@@ -240,11 +252,16 @@ problemWithGuide.forEach(touristProblems => {
 });
 htmlResult += `</table>`;
 htmlResult += `<hr></hr> <table border='1'> <tr> <th>Kompanija</th> <th>Gidai</th>`;
-console.log(guidesFromCompanies);
 guidesFromCompanies.forEach(company => {
     var _a;
     htmlResult += `<tr> <td> ${company.company} </td>
     <td> ${(_a = company.guides) === null || _a === void 0 ? void 0 : _a.map(g => g.firstName)} </td> </tr>`;
+});
+htmlResult += `</table>`;
+htmlResult += `<hr></hr> <table border='1'> <tr> <th>Vardas</th> <th>Lytis</th> <th>Statusas</th> </tr>`;
+peopleByGenger.forEach(ppl => {
+    htmlResult += `<tr> <td> ${ppl.firstName} </td>
+    <td> ${ppl.genger} </td> <td> ${ppl.status} </td> </tr>`;
 });
 htmlResult += `</table>`;
 const el = document.getElementById("guides");

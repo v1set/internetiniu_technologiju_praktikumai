@@ -6,7 +6,7 @@ interface Tourist {
     languages: Array<string>;
     goals: Array<number>;
     family: Array<number>
-    genger: string
+    genger: 'm' | 'f'
 }
 
 interface Guide {
@@ -14,7 +14,7 @@ interface Guide {
     company: string;
     languages: Array<string>;
     places: Array<number>;
-    genger: string
+    genger: 'm' | 'f'
 }
 
 interface VisitedPlace {
@@ -46,6 +46,12 @@ interface ProblemWithGuide {
 interface GuidesFromCompany {
     company: string
     guides: Array<Guide>
+}
+
+interface People {
+    firstName: string,
+    genger: 'm' | 'f'
+    status: "Gidas" | "Turistas"
 }
 
 
@@ -241,7 +247,6 @@ function sadnessWithGuide(guides:Array<Guide>, tourist:Tourist): Array<ProblemWi
             arr.push(problem)
         }
     })
-    // console.log(arr)
     return arr;
 }
 
@@ -263,6 +268,21 @@ function guidesFromCompany(guides:Array<Guide>):Array<GuidesFromCompany> {
         }
     });
     return companies
+}
+
+function getByGender(guides:Array<Guide>, tourists:Array<Tourist>):Array<People> {
+    const people:Array<People> = []
+
+    guides.forEach(guide => {
+        people.push({firstName: guide.firstName, genger: guide.genger, status: "Gidas"})
+    })
+
+    tourists.forEach(tourist => {
+        people.push({firstName: tourist.firstName, genger: tourist.genger, status: "Turistas"})
+    })
+
+    people.sort((a, b) => { if (a.genger < b.genger) return -1; return 1; })
+    return people
 }
 
 
@@ -288,6 +308,8 @@ tourists.forEach(tourist => {
 })
 
 const guidesFromCompanies = guidesFromCompany(tourGuides)
+
+const peopleByGenger = getByGender(tourGuides, tourists)
 
 
 // {{Return result to html}}
@@ -316,10 +338,16 @@ problemWithGuide.forEach(touristProblems => {
 htmlResult += `</table>`
 
 htmlResult += `<hr></hr> <table border='1'> <tr> <th>Kompanija</th> <th>Gidai</th>`
-console.log(guidesFromCompanies)
 guidesFromCompanies.forEach(company => {
     htmlResult += `<tr> <td> ${company.company} </td>
     <td> ${company.guides?.map(g => g.firstName)} </td> </tr>`
+})
+htmlResult += `</table>`
+
+htmlResult += `<hr></hr> <table border='1'> <tr> <th>Vardas</th> <th>Lytis</th> <th>Statusas</th> </tr>`
+peopleByGenger.forEach(ppl => {
+    htmlResult += `<tr> <td> ${ppl.firstName} </td>
+    <td> ${ppl.genger} </td> <td> ${ppl.status} </td> </tr>`
 })
 htmlResult += `</table>`
 
