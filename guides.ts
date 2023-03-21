@@ -285,6 +285,80 @@ function getByGender(guides:Array<Guide>, tourists:Array<Tourist>):Array<People>
     return people
 }
 
+function getFamilies(tourists:Array<Tourist>):Array<Array<Tourist>> {
+    const families:Array<Array<Tourist>> = []
+    const notUniqueIds:Array<number> = []
+
+    tourists.forEach(tourist => {
+        if (tourist.family[0]) {
+            if (!notUniqueIds.find(x => x === tourist.id)) {
+                const family = []
+                notUniqueIds.push(tourist.id)
+                family.push(tourist)
+
+                tourist.family.forEach(familyMemberId => {
+                    const familyMember = tourists[tourists.findIndex(x => x.id === familyMemberId)]
+                    notUniqueIds.push(familyMemberId)
+                    family.push(familyMember)
+                })
+
+                families.push(family)
+            }
+        }
+    })
+    return families
+}
+
+function findGuidesForGoals(guides:Array<Guide>, goals:Array<number>, 
+    needsGuidesArg:Array<Guide> = []):Array<Guide> 
+{
+    let needsGuides:Array<Guide> = []
+    // Find guide who can show most places
+    let bestGuideOption:Guide = guides[0]
+    let bestFit = 0
+    guides.forEach(guide => {
+        let goalsFit = 0
+        guide.places.forEach(place => {
+            if (goals.includes(place)) goalsFit ++
+        })
+        if (goalsFit > bestFit) {bestGuideOption = guide; bestFit = goalsFit}
+    })
+
+    // include guide and recall function without these goals
+    needsGuides.push(bestGuideOption)
+    bestGuideOption.places.forEach(place => {
+        const index = goals.findIndex(x => x === place)
+        if (index > -1) goals.splice(index, 1);
+    })
+    // console.log("Goals left: ", goals)
+    
+    // make sure we can get guide for left goals
+    let canVisitMore = false
+    guides.forEach(guide => {
+        goals.forEach(goal => {
+            if (guide.places.includes(goal)) canVisitMore = true
+        })
+    });
+
+    if (goals.length != 0 && canVisitMore) 
+        findGuidesForGoals(guides, goals, needsGuides).forEach(guide => needsGuides.push(guide))
+
+    return needsGuides
+}
+
+function getFamiliesGoals(family:Array<Tourist>):Array<number> {
+    const goals:Array<number> = []
+    family.forEach(familyMember => {
+        familyMember.goals.forEach(goal => {
+            if (!goals.includes(goal)) goals.push(goal);
+        })
+    })
+
+    return goals
+}
+
+
+
 
 
 // {{Calls}}
@@ -314,9 +388,11 @@ const peopleByGenger = getByGender(tourGuides, tourists)
 
 // {{Return result to html}}
 
+// Guides Languages
 let htmlResult: string = "<h1>Gidai</h1>"
 guideLng.forEach((lng) => htmlResult += `<div>${lng}</div>`)
 
+// Tourists
 htmlResult += "<h1>Turistai</h1>"
 touristsLng.forEach((lng) => htmlResult += `<div>${lng}</div>`)
 
@@ -327,6 +403,7 @@ clientLists.forEach((listIndex) => {
     listIndex.clients.forEach((client) => htmlResult += `<div>${client.firstName}</div>`)
 })
 
+// Sadness with guides
 htmlResult += `<hr></hr> <table border='1'> <tr> <th>Turistas</th> <th>Neaplankys vietos</th> <th>Nes</th>`
 problemWithGuide.forEach(touristProblems => {
     touristProblems.forEach(problem => {
@@ -337,6 +414,7 @@ problemWithGuide.forEach(touristProblems => {
 })
 htmlResult += `</table>`
 
+// Guides From Companies
 htmlResult += `<hr></hr> <table border='1'> <tr> <th>Kompanija</th> <th>Gidai</th>`
 guidesFromCompanies.forEach(company => {
     htmlResult += `<tr> <td> ${company.company} </td>
@@ -344,12 +422,36 @@ guidesFromCompanies.forEach(company => {
 })
 htmlResult += `</table>`
 
+// Genger
 htmlResult += `<hr></hr> <table border='1'> <tr> <th>Vardas</th> <th>Lytis</th> <th>Statusas</th> </tr>`
 peopleByGenger.forEach(ppl => {
     htmlResult += `<tr> <td> ${ppl.firstName} </td>
     <td> ${ppl.genger} </td> <td> ${ppl.status} </td> </tr>`
 })
 htmlResult += `</table>`
+
+
+// Families
+htmlResult += `<hr></hr> <table border='1'> <tr> <th>Seimos nariai</th> <th>Reikalingi gidai</th> <th>Vietos kurioms nera gido</th> </tr>`
+getFamilies(tourists).forEach(family => {
+    const familyGoals = getFamiliesGoals(family)
+    const familyGuides = findGuidesForGoals(tourGuides, familyGoals)
+    htmlResult += `<tr> <td> ${family.map(member => member.firstName)} </td> 
+    <td> ${familyGuides.map(guide => guide.firstName)} </td>
+    <td> ${familyGoals.map(goal => visitedPlaces[visitedPlaces.findIndex(x => x.id === goal)].title)} </td> </tr>`
+    console.log(family, familyGuides)
+})
+htmlResult += `</table>`
+
+
+
+
+
+
+
+
+
+
 
 const el = document.getElementById("guides")
     if (el) el.innerHTML = htmlResult;
